@@ -27,6 +27,7 @@ type Visualizer struct {
 
 	sz  size.Event
 	pos image.Rectangle
+	mousePos image.Point
 }
 
 func (pw *Visualizer) Main() {
@@ -44,6 +45,8 @@ func (pw *Visualizer) Update(t screen.Texture) {
 func (pw *Visualizer) run(s screen.Screen) {
 	w, err := s.NewWindow(&screen.NewWindowOptions{
 		Title: pw.Title,
+		Width: 800,
+		Height: 800,
 	})
 	if err != nil {
 		log.Fatal("Failed to initialize the app window:", err)
@@ -114,8 +117,10 @@ func (pw *Visualizer) handleEvent(e any, t screen.Texture) {
 		log.Printf("ERROR: %s", e)
 
 	case mouse.Event:
-		if t == nil {
+		if e.Button == mouse.ButtonLeft && e.Direction == mouse.DirPress {
 			// TODO: Реалізувати реакцію на натискання кнопки миші.
+			pw.mousePos = image.Point{X: int(e.X), Y: int(e.Y)}
+			pw.w.Send(paint.Event{})
 		}
 
 	case paint.Event:
@@ -131,10 +136,19 @@ func (pw *Visualizer) handleEvent(e any, t screen.Texture) {
 }
 
 func (pw *Visualizer) drawDefaultUI() {
-	pw.w.Fill(pw.sz.Bounds(), color.Black, draw.Src) // Фон.
+	pw.w.Fill(pw.sz.Bounds(), color.White, draw.Src) // Фон.
 
 	// TODO: Змінити колір фону та додати відображення фігури у вашому варіанті.
+	centerX, centerY := 400, 400
+	if pw.mousePos != (image.Point{}) {
+		centerX, centerY = pw.mousePos.X, pw.mousePos.Y
+	}
+	tWidth, tHeight := 400, 300
+	horRect := image.Rect(centerX-tWidth/2, centerY, centerX+tWidth/2, centerY-tHeight/2)
+	verRect := image.Rect(centerX-tWidth/5, centerY+tHeight/2, centerX+tWidth/5, centerY)
 
+	pw.w.Fill(horRect, color.RGBA{R: 255, G: 255, B: 0, A: 255}, draw.Src)
+	pw.w.Fill(verRect, color.RGBA{R: 255, G: 255, B: 0, A: 255}, draw.Src)
 	// Малювання білої рамки.
 	for _, br := range imageutil.Border(pw.sz.Bounds(), 10) {
 		pw.w.Fill(br, color.White, draw.Src)
