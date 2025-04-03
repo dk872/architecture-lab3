@@ -34,7 +34,7 @@ func (l *Loop) Start(s screen.Screen) {
 
 	// TODO: стартувати цикл подій.
 	l.mq = messageQueue{}
-	go l.eventProces()
+	go l.eventProcess()
 }
 
 // Post додає нову операцію у внутрішню чергу.
@@ -53,9 +53,9 @@ func (l *Loop) StopAndWait() {
 }
 
 // TODO: Реалізувати чергу подій.
-type messageQueue struct{
-	Queue []Operation
-	mu sync.Mutex
+type messageQueue struct {
+	Queue   []Operation
+	mu      sync.Mutex
 	blocked chan struct{}
 }
 
@@ -78,7 +78,7 @@ func (mq *messageQueue) pull() Operation {
 		<-mq.blocked
 		mq.mu.Lock()
 	}
-	
+
 	op := mq.Queue[0]
 	mq.Queue[0] = nil
 	mq.Queue = mq.Queue[1:]
@@ -89,7 +89,7 @@ func (mq *messageQueue) empty() bool {
 	return len(mq.Queue) == 0
 }
 
-func (l *Loop) eventProces() {
+func (l *Loop) eventProcess() {
 	for {
 		if op := l.mq.pull(); op != nil {
 			if update := op.Do(l.next); update {
