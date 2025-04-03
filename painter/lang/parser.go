@@ -74,7 +74,7 @@ func (p *Parser) Parse(in io.Reader) ([]painter.Operation, error) {
 			continue
 		}
 
-		err := p.processCommand(fields) // Обробка кожної команди
+		err := p.parse(fields) // Обробка кожної команди
 		if err != nil {
 			return nil, err
 		}
@@ -84,8 +84,8 @@ func (p *Parser) Parse(in io.Reader) ([]painter.Operation, error) {
 	return res, nil
 }
 
-// processCommand обробляє окремі команди з вхідних даних
-func (p *Parser) processCommand(fields []string) error {
+// parse обробляє окремі команди з вхідних даних
+func (p *Parser) parse(fields []string) error {
 	command := fields[0]
 
 	switch command {
