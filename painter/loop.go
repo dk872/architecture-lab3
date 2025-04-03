@@ -32,7 +32,6 @@ func (l *Loop) Start(s screen.Screen) {
 	l.next, _ = s.NewTexture(size)
 	l.prev, _ = s.NewTexture(size)
 
-	// TODO: стартувати цикл подій.
 	l.mq = messageQueue{}
 	go l.eventProcess()
 }
@@ -52,7 +51,6 @@ func (l *Loop) StopAndWait() {
 	<-l.stop
 }
 
-// TODO: Реалізувати чергу подій.
 type messageQueue struct {
 	Queue   []Operation
 	mu      sync.Mutex
