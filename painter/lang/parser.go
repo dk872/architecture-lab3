@@ -17,16 +17,12 @@ type Parser struct {
 	updateOperation  painter.Operation          // Операція оновлення
 	figureOperations []*painter.FigureOperation // Операції фігур
 	moveOperations   []painter.Operation        // Операції руху
-	resetOperations  painter.Operation          // Операція скидання
 }
 
 // clearOperations очищає всі зібрані операції
 func (p *Parser) clearOperations() {
 	if p.updateOperation != nil {
 		p.updateOperation = nil
-	}
-	if p.resetOperations != nil {
-		p.resetOperations = nil
 	}
 	if p.moveOperations != nil {
 		p.moveOperations = nil
@@ -54,9 +50,6 @@ func (p *Parser) getAllOperations() []painter.Operation {
 	}
 	if p.updateOperation != nil {
 		res = append(res, p.updateOperation)
-	}
-	if p.resetOperations != nil {
-		res = append(res, p.resetOperations)
 	}
 	return res
 }
@@ -135,10 +128,9 @@ func (p *Parser) parse(fields []string) error {
 
 // resetState скидає всі зібрані операції та налаштовує початковий стан
 func (p *Parser) resetState() {
-	p.currentBgColor = nil
+	p.currentBgColor = painter.OperationFunc(painter.ResetOperation)
 	p.currentRect = nil
 	p.updateOperation = nil
 	p.figureOperations = nil
 	p.moveOperations = nil
-	p.resetOperations = &painter.ResetOperation{Figures: &p.figureOperations}
 }

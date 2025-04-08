@@ -96,12 +96,6 @@ func (op MoveFiguresOperation) Do(t screen.Texture) bool {
 }
 
 // ResetOperation очищає текстуру і зафарбовує її чорним
-type ResetOperation struct {
-	Figures *[]*FigureOperation
-}
-
-func (op ResetOperation) Do(t screen.Texture) bool {
+func ResetOperation(t screen.Texture) {
 	t.Fill(t.Bounds(), color.Black, screen.Src)
-	*op.Figures = nil // Очищення списку фігур
-	return false
 }
