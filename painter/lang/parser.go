@@ -73,6 +73,12 @@ func (p *Parser) Parse(in io.Reader) ([]painter.Operation, error) {
 	return res, nil
 }
 
+// scale змінює користувацькі координати на ті, з якими працює програма
+func scale(value float64) float64 {
+	const canvasSize = 800
+	return value * canvasSize
+}
+
 // parse обробляє окремі команди з вхідних даних
 func (p *Parser) parse(fields []string) error {
 	command := fields[0]
@@ -106,7 +112,7 @@ func (p *Parser) parse(fields []string) error {
 			return fmt.Errorf("invalid Y2 value: %v", err)
 		}
 
-		p.currentRect = &painter.RectOperation{X1: X1, Y1: Y1, X2: X2, Y2: Y2}
+		p.currentRect = &painter.RectOperation{X1: scale(X1), Y1: scale(Y1), X2: scale(X2), Y2: scale(Y2)}
 	case "figure":
 		if len(fields) != 3 {
 			return fmt.Errorf("invalid figure command format")
@@ -121,7 +127,7 @@ func (p *Parser) parse(fields []string) error {
 			return fmt.Errorf("invalid figure Y value: %v", err)
 		}
 
-		fig := &painter.FigureOperation{X: X, Y: Y}
+		fig := &painter.FigureOperation{X: scale(X), Y: scale(Y)}
 		p.figureOperations = append(p.figureOperations, fig)
 	case "move":
 		if len(fields) != 3 {
@@ -137,7 +143,7 @@ func (p *Parser) parse(fields []string) error {
 			return fmt.Errorf("invalid move Y value: %v", err)
 		}
 
-		moveOp := &painter.MoveFiguresOperation{X: X, Y: Y, Figures: &p.figureOperations}
+		moveOp := &painter.MoveFiguresOperation{X: scale(X), Y: scale(Y), Figures: &p.figureOperations}
 		p.moveOperations = append(p.moveOperations, moveOp)
 	case "reset":
 		p.resetState()
