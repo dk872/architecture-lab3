@@ -38,11 +38,9 @@ func (l *Loop) Start(s screen.Screen) {
 
 // Post додає нову операцію у внутрішню чергу.
 func (l *Loop) Post(op Operation) {
-	if op == nil {
-		return
+	if op != nil {
+		l.mq.push(op)
 	}
-
-	l.mq.push(op)
 }
 
 // StopAndWait сигналізує про необхідність завершити цикл та блокується до моменту його повної зупинки.
@@ -63,16 +61,6 @@ func (mq *messageQueue) push(op Operation) {
 	mq.mu.Lock()
 	defer mq.mu.Unlock()
 	mq.Queue = append(mq.Queue, op)
-	if mq.blocked != nil {
-		close(mq.blocked)
-		mq.blocked = nil
-	}
-}
-
-func (mq *messageQueue) pushFront(op Operation) {
-	mq.mu.Lock()
-	defer mq.mu.Unlock()
-	mq.Queue = append([]Operation{op}, mq.Queue...) // додати спереду
 	if mq.blocked != nil {
 		close(mq.blocked)
 		mq.blocked = nil
@@ -101,17 +89,11 @@ func (mq *messageQueue) empty() bool {
 
 func (l *Loop) eventProcess() {
 	for {
-
-		if l.stopReq && l.mq.empty() {
-			close(l.stop)
-			return
-		}
 		if op := l.mq.pull(); op != nil {
 			if update := op.Do(l.next); update {
 				l.Receiver.Update(l.next)
 				l.next, l.prev = l.prev, l.next
 			}
 		}
-
 	}
 }
