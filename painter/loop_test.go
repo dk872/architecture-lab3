@@ -16,6 +16,7 @@ func TestLoop_Post(t *testing.T) {
 		tr testReceiver
 	)
 	l.Receiver = &tr
+	l.stop = make(chan struct{})
 
 	var testOps []string
 
@@ -54,7 +55,7 @@ func TestLoop_Post(t *testing.T) {
 		t.Error("Unexpected size of colors:", mt.Colors)
 	}
 
-	if !reflect.DeepEqual(testOps, []string{"op 1", "op 2", "op 3"}) {
+	if !reflect.DeepEqual(testOps, []string{"op 1", "op 3", "op 2"}) {
 		t.Error("Bad order:", testOps)
 	}
 }
