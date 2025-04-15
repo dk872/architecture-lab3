@@ -16,6 +16,7 @@ func TestLoop_Post(t *testing.T) {
 		tr testReceiver
 	)
 	l.Receiver = &tr
+	l.stop = make(chan struct{})
 
 	var testOps []string
 
