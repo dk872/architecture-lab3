@@ -63,3 +63,77 @@ update`
 		}
 	})
 }
+
+func TestGreenAndFigureUpdate(t *testing.T) {
+	input := `green
+figure 0.2 0.3
+update`
+	parser := &Parser{}
+	ops, err := parser.Parse(strings.NewReader(input))
+	if err != nil {
+		t.Fatalf("Помилка: %v", err)
+	}
+	if len(ops) != 3 {
+		t.Fatalf("Очікувалося 3 операції, але отримано %d", len(ops))
+	}
+	if _, ok := ops[0].(painter.OperationFunc); !ok {
+		t.Errorf("Очікувалося OperationFunc (green), отримано %T", ops[0])
+	}
+	if fig, ok := ops[1].(*painter.FigureOperation); ok {
+		wantX, wantY := 0.2*800, 0.3*800
+		if fig.X != wantX || fig.Y != wantY {
+			t.Errorf("FigureOperation має неправильні координати: %+v", fig)
+		}
+	} else {
+		t.Errorf("Очікувався FigureOperation, отримано %T", ops[1])
+	}
+	if reflect.TypeOf(ops[2]).String() != "painter.updateOp" {
+		t.Errorf("Очікувався updateOp, отримано %T", ops[2])
+	}
+}
+
+func TestResetCommand(t *testing.T) {
+	input := `white
+bgrect 0.1 0.1 0.2 0.2
+reset
+update`
+	parser := &Parser{}
+	ops, err := parser.Parse(strings.NewReader(input))
+	if err != nil {
+		t.Fatalf("Помилка: %v", err)
+	}
+	if len(ops) != 2 {
+		t.Fatalf("Очікувалося 2 операції після reset (reset, update), але отримано %d", len(ops))
+	}
+	if _, ok := ops[0].(painter.OperationFunc); !ok {
+		t.Errorf("Очікувалося OperationFunc (reset), отримано %T", ops[0])
+	}
+	if reflect.TypeOf(ops[1]).String() != "painter.updateOp" {
+		t.Errorf("Очікувався updateOp, отримано %T", ops[1])
+	}
+}
+
+func TestUnknownAndInvalidCommands(t *testing.T) {
+	parser := &Parser{}
+
+	t.Run("unknown command", func(t *testing.T) {
+		_, err := parser.Parse(strings.NewReader("foo"))
+		if err == nil || !strings.Contains(err.Error(), "unknown command") {
+			t.Errorf("Очікувалася помилка unknown command, отримано %v", err)
+		}
+	})
+
+	t.Run("invalid bgrect format", func(t *testing.T) {
+		_, err := parser.Parse(strings.NewReader("bgrect 0.1 0.2"))
+		if err == nil || !strings.Contains(err.Error(), "invalid bgrect command format") {
+			t.Errorf("Очікувалася помилка invalid bgrect command format, отримано %v", err)
+		}
+	})
+
+	t.Run("invalid bgrect values", func(t *testing.T) {
+		_, err := parser.Parse(strings.NewReader("bgrect a b c d"))
+		if err == nil || !strings.Contains(err.Error(), "invalid") {
+			t.Errorf("Очікувалася помилка invalid X1 value, отримано %v", err)
+		}
+	})
+}

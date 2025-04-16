@@ -105,3 +105,22 @@ func (m *mockTexture) Upload(dp image.Point, src screen.Buffer, sr image.Rectang
 func (m *mockTexture) Fill(dr image.Rectangle, src color.Color, op draw.Op) {
 	m.Colors = append(m.Colors, src)
 }
+
+func TestLoop_PostEmptyOperation(t *testing.T) {
+	var (
+		l  Loop
+		tr testReceiver
+	)
+	l.Receiver = &tr
+	l.stop = make(chan struct{})
+
+	l.Start(mockScreen{})
+
+	l.Post(nil)
+
+	l.StopAndWait()
+
+	if tr.lastTexture != nil {
+		t.Error("Texture should not have been updated")
+	}
+}
