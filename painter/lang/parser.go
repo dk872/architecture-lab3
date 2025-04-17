@@ -85,7 +85,7 @@ func parseCoordinates(raw string, name string) (float64, error) {
 	if err != nil {
 		return 0, fmt.Errorf("invalid %s value: %v", name, err)
 	}
-	if value <= 0.0 || value >= 1.0 {
+	if value < 0.0 || value > 1.0 {
 		return 0, fmt.Errorf("%s value %.2f out of range [0.0 - 1.0]", name, value)
 	}
 	return value, nil
