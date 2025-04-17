@@ -8,7 +8,7 @@ import (
 	"github.com/dk872/architecture-lab3/painter"
 )
 
-func TestParser(t *testing.T) {
+func TestParser_ParseMultipleCommands(t *testing.T) {
 	input := `white
 bgrect 0.1 0.2 0.3 0.4
 figure 0.5 0.5
@@ -31,7 +31,12 @@ update`
 		}
 
 		if rect, ok := ops[1].(*painter.RectOperation); ok {
-			want := &painter.RectOperation{X1: 80, Y1: 160, X2: 240, Y2: 320}
+			want := &painter.RectOperation{
+				X1: scale(0.1),
+				Y1: scale(0.2),
+				X2: scale(0.3),
+				Y2: scale(0.4),
+			}
 			if rect.X1 != want.X1 || rect.Y1 != want.Y1 || rect.X2 != want.X2 || rect.Y2 != want.Y2 {
 				t.Errorf("RectOperation має неправильні координати: %+v", rect)
 			}
@@ -40,7 +45,7 @@ update`
 		}
 
 		if move, ok := ops[2].(*painter.MoveFiguresOperation); ok {
-			if move.X != 80 || move.Y != 80 {
+			if move.X != scale(0.1) || move.Y != scale(0.1) {
 				t.Errorf("MoveFiguresOperation має неправильні координати: %+v", move)
 			}
 			if move.Figures == nil || len(*move.Figures) != 1 {
@@ -51,7 +56,7 @@ update`
 		}
 
 		if fig, ok := ops[3].(*painter.FigureOperation); ok {
-			if fig.X != 400 || fig.Y != 400 {
+			if fig.X != scale(0.5) || fig.Y != scale(0.5) {
 				t.Errorf("FigureOperation має неправильні координати: %+v", fig)
 			}
 		} else {
@@ -64,10 +69,11 @@ update`
 	})
 }
 
-func TestGreenAndFigureUpdate(t *testing.T) {
+func TestParser_ParseOtherCommands(t *testing.T) {
 	input := `green
 figure 0.2 0.3
 update`
+
 	parser := &Parser{}
 	ops, err := parser.Parse(strings.NewReader(input))
 	if err != nil {
@@ -80,7 +86,7 @@ update`
 		t.Errorf("Очікувалося OperationFunc (green), отримано %T", ops[0])
 	}
 	if fig, ok := ops[1].(*painter.FigureOperation); ok {
-		wantX, wantY := 0.2*800, 0.3*800
+		wantX, wantY := scale(0.2), scale(0.3)
 		if fig.X != wantX || fig.Y != wantY {
 			t.Errorf("FigureOperation має неправильні координати: %+v", fig)
 		}
@@ -92,11 +98,12 @@ update`
 	}
 }
 
-func TestResetCommand(t *testing.T) {
+func TestParser_ParseReset(t *testing.T) {
 	input := `white
 bgrect 0.1 0.1 0.2 0.2
 reset
 update`
+
 	parser := &Parser{}
 	ops, err := parser.Parse(strings.NewReader(input))
 	if err != nil {
@@ -113,7 +120,7 @@ update`
 	}
 }
 
-func TestUnknownAndInvalidCommands(t *testing.T) {
+func TestParser_UnknownAndInvalidCommands(t *testing.T) {
 	parser := &Parser{}
 
 	t.Run("unknown command", func(t *testing.T) {
