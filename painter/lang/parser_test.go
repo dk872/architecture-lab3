@@ -137,10 +137,38 @@ func TestParser_UnknownAndInvalidCommands(t *testing.T) {
 		}
 	})
 
-	t.Run("invalid bgrect values", func(t *testing.T) {
-		_, err := parser.Parse(strings.NewReader("bgrect 2.1 b 1.9 4.3"))
+	t.Run("invalid bgrect value: not a number", func(t *testing.T) {
+		_, err := parser.Parse(strings.NewReader("bgrect 0.6 b 0.8 0.9"))
 		if err == nil || !strings.Contains(err.Error(), "invalid") {
 			t.Errorf("Expected invalid Y1 value error, got %v", err)
+		}
+	})
+
+	t.Run("invalid bgrect value: out of range low", func(t *testing.T) {
+		_, err := parser.Parse(strings.NewReader("bgrect -0.1 0.2 0.3 0.4"))
+		if err == nil || !strings.Contains(err.Error(), "X1 value -0.10 out of range") {
+			t.Errorf("Expected out of range X1 error, got %v", err)
+		}
+	})
+
+	t.Run("invalid bgrect value: out of range high", func(t *testing.T) {
+		_, err := parser.Parse(strings.NewReader("bgrect 0.1 0.2 1.2 0.4"))
+		if err == nil || !strings.Contains(err.Error(), "X2 value 1.20 out of range") {
+			t.Errorf("Expected out of range X2 error, got %v", err)
+		}
+	})
+
+	t.Run("invalid figure value", func(t *testing.T) {
+		_, err := parser.Parse(strings.NewReader("figure 0.5 a"))
+		if err == nil || !strings.Contains(err.Error(), "invalid Y value") {
+			t.Errorf("Expected invalid figure Y value error, got %v", err)
+		}
+	})
+
+	t.Run("invalid move value", func(t *testing.T) {
+		_, err := parser.Parse(strings.NewReader("move 5 0.5"))
+		if err == nil || !strings.Contains(err.Error(), "X value 5.00 out of range") {
+			t.Errorf("Expected out of range X error in move, got %v", err)
 		}
 	})
 }

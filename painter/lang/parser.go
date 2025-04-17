@@ -79,6 +79,18 @@ func scale(value float64) float64 {
 	return value * canvasSize
 }
 
+// parseCoordinates отримує координати та перевіряє правильність їх введення: мають бути від 0 до 1
+func parseCoordinates(raw string, name string) (float64, error) {
+	value, err := strconv.ParseFloat(raw, 64)
+	if err != nil {
+		return 0, fmt.Errorf("invalid %s value: %v", name, err)
+	}
+	if value <= 0.0 || value >= 1.0 {
+		return 0, fmt.Errorf("%s value %.2f out of range [0.0 - 1.0]", name, value)
+	}
+	return value, nil
+}
+
 // parse обробляє окремі команди з вхідних даних
 func (p *Parser) parse(fields []string) error {
 	command := fields[0]
@@ -95,21 +107,21 @@ func (p *Parser) parse(fields []string) error {
 			return fmt.Errorf("invalid bgrect command format")
 		}
 
-		X1, err := strconv.ParseFloat(fields[1], 64)
+		X1, err := parseCoordinates(fields[1], "X1")
 		if err != nil {
-			return fmt.Errorf("invalid X1 value: %v", err)
+			return err
 		}
-		Y1, err := strconv.ParseFloat(fields[2], 64)
+		Y1, err := parseCoordinates(fields[2], "Y1")
 		if err != nil {
-			return fmt.Errorf("invalid Y1 value: %v", err)
+			return err
 		}
-		X2, err := strconv.ParseFloat(fields[3], 64)
+		X2, err := parseCoordinates(fields[3], "X2")
 		if err != nil {
-			return fmt.Errorf("invalid X2 value: %v", err)
+			return err
 		}
-		Y2, err := strconv.ParseFloat(fields[4], 64)
+		Y2, err := parseCoordinates(fields[4], "Y2")
 		if err != nil {
-			return fmt.Errorf("invalid Y2 value: %v", err)
+			return err
 		}
 
 		p.currentRect = &painter.RectOperation{X1: scale(X1), Y1: scale(Y1), X2: scale(X2), Y2: scale(Y2)}
@@ -118,13 +130,13 @@ func (p *Parser) parse(fields []string) error {
 			return fmt.Errorf("invalid figure command format")
 		}
 
-		X, err := strconv.ParseFloat(fields[1], 64)
+		X, err := parseCoordinates(fields[1], "X")
 		if err != nil {
-			return fmt.Errorf("invalid figure X value: %v", err)
+			return err
 		}
-		Y, err := strconv.ParseFloat(fields[2], 64)
+		Y, err := parseCoordinates(fields[2], "Y")
 		if err != nil {
-			return fmt.Errorf("invalid figure Y value: %v", err)
+			return err
 		}
 
 		fig := &painter.FigureOperation{X: scale(X), Y: scale(Y)}
@@ -134,13 +146,13 @@ func (p *Parser) parse(fields []string) error {
 			return fmt.Errorf("invalid move command format")
 		}
 
-		X, err := strconv.ParseFloat(fields[1], 64)
+		X, err := parseCoordinates(fields[1], "X")
 		if err != nil {
-			return fmt.Errorf("invalid move X value: %v", err)
+			return err
 		}
-		Y, err := strconv.ParseFloat(fields[2], 64)
+		Y, err := parseCoordinates(fields[2], "Y")
 		if err != nil {
-			return fmt.Errorf("invalid move Y value: %v", err)
+			return err
 		}
 
 		moveOp := &painter.MoveFiguresOperation{X: scale(X), Y: scale(Y), Figures: &p.figureOperations}
