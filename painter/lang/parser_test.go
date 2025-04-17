@@ -18,16 +18,16 @@ update`
 	parser := &Parser{}
 	ops, err := parser.Parse(strings.NewReader(input))
 	if err != nil {
-		t.Fatalf("Помилка: %v", err)
+		t.Fatalf("Error: %v", err)
 	}
 
 	if len(ops) != 5 {
-		t.Fatalf("Очікувалося 5 операцій, але отримано %d", len(ops))
+		t.Fatalf("Expected 5 operations, but got %d", len(ops))
 	}
 
 	t.Run("check types and values", func(t *testing.T) {
 		if _, ok := ops[0].(painter.OperationFunc); !ok {
-			t.Errorf("Очікувалась OperationFunc (white), отримано %T", ops[0])
+			t.Errorf("Expected OperationFunc (white), got %T", ops[0])
 		}
 
 		if rect, ok := ops[1].(*painter.RectOperation); ok {
@@ -38,33 +38,33 @@ update`
 				Y2: scale(0.4),
 			}
 			if rect.X1 != want.X1 || rect.Y1 != want.Y1 || rect.X2 != want.X2 || rect.Y2 != want.Y2 {
-				t.Errorf("RectOperation має неправильні координати: %+v", rect)
+				t.Errorf("RectOperation has incorrect coordinates: %+v", rect)
 			}
 		} else {
-			t.Errorf("Очікувався RectOperation, отримано %T", ops[1])
+			t.Errorf("Expected RectOperation, got %T", ops[1])
 		}
 
 		if move, ok := ops[2].(*painter.MoveFiguresOperation); ok {
 			if move.X != scale(0.1) || move.Y != scale(0.1) {
-				t.Errorf("MoveFiguresOperation має неправильні координати: %+v", move)
+				t.Errorf("MoveFiguresOperation has incorrect coordinates: %+v", move)
 			}
 			if move.Figures == nil || len(*move.Figures) != 1 {
-				t.Errorf("MoveFiguresOperation має некоректний список фігур")
+				t.Errorf("MoveFiguresOperation has invalid figures list")
 			}
 		} else {
-			t.Errorf("Очікувався MoveFiguresOperation, отримано %T", ops[2])
+			t.Errorf("Expected MoveFiguresOperation, got %T", ops[2])
 		}
 
 		if fig, ok := ops[3].(*painter.FigureOperation); ok {
 			if fig.X != scale(0.5) || fig.Y != scale(0.5) {
-				t.Errorf("FigureOperation має неправильні координати: %+v", fig)
+				t.Errorf("FigureOperation has incorrect coordinates: %+v", fig)
 			}
 		} else {
-			t.Errorf("Очікувався FigureOperation, отримано %T", ops[3])
+			t.Errorf("Expected FigureOperation, got %T", ops[3])
 		}
 
 		if reflect.TypeOf(ops[4]).String() != "painter.updateOp" {
-			t.Errorf("Очікувався updateOp, отримано %T", ops[4])
+			t.Errorf("Expected updateOp, got %T", ops[4])
 		}
 	})
 }
@@ -77,24 +77,24 @@ update`
 	parser := &Parser{}
 	ops, err := parser.Parse(strings.NewReader(input))
 	if err != nil {
-		t.Fatalf("Помилка: %v", err)
+		t.Fatalf("Error: %v", err)
 	}
 	if len(ops) != 3 {
-		t.Fatalf("Очікувалося 3 операції, але отримано %d", len(ops))
+		t.Fatalf("Expected 3 operations, but got %d", len(ops))
 	}
 	if _, ok := ops[0].(painter.OperationFunc); !ok {
-		t.Errorf("Очікувалося OperationFunc (green), отримано %T", ops[0])
+		t.Errorf("Expected OperationFunc (green), got %T", ops[0])
 	}
 	if fig, ok := ops[1].(*painter.FigureOperation); ok {
 		wantX, wantY := scale(0.2), scale(0.3)
 		if fig.X != wantX || fig.Y != wantY {
-			t.Errorf("FigureOperation має неправильні координати: %+v", fig)
+			t.Errorf("FigureOperation has incorrect coordinates: %+v", fig)
 		}
 	} else {
-		t.Errorf("Очікувався FigureOperation, отримано %T", ops[1])
+		t.Errorf("Expected FigureOperation, got %T", ops[1])
 	}
 	if reflect.TypeOf(ops[2]).String() != "painter.updateOp" {
-		t.Errorf("Очікувався updateOp, отримано %T", ops[2])
+		t.Errorf("Expected updateOp, got %T", ops[2])
 	}
 }
 
@@ -107,16 +107,16 @@ update`
 	parser := &Parser{}
 	ops, err := parser.Parse(strings.NewReader(input))
 	if err != nil {
-		t.Fatalf("Помилка: %v", err)
+		t.Fatalf("Error: %v", err)
 	}
 	if len(ops) != 2 {
-		t.Fatalf("Очікувалося 2 операції після reset (reset, update), але отримано %d", len(ops))
+		t.Fatalf("Expected 2 operations after reset (reset, update), but got %d", len(ops))
 	}
 	if _, ok := ops[0].(painter.OperationFunc); !ok {
-		t.Errorf("Очікувалося OperationFunc (reset), отримано %T", ops[0])
+		t.Errorf("Expected OperationFunc (reset), got %T", ops[0])
 	}
 	if reflect.TypeOf(ops[1]).String() != "painter.updateOp" {
-		t.Errorf("Очікувався updateOp, отримано %T", ops[1])
+		t.Errorf("Expected updateOp, got %T", ops[1])
 	}
 }
 
@@ -126,21 +126,21 @@ func TestParser_UnknownAndInvalidCommands(t *testing.T) {
 	t.Run("unknown command", func(t *testing.T) {
 		_, err := parser.Parse(strings.NewReader("foo"))
 		if err == nil || !strings.Contains(err.Error(), "unknown command") {
-			t.Errorf("Очікувалася помилка unknown command, отримано %v", err)
+			t.Errorf("Expected unknown command error, got %v", err)
 		}
 	})
 
 	t.Run("invalid bgrect format", func(t *testing.T) {
 		_, err := parser.Parse(strings.NewReader("bgrect 0.1 0.2"))
 		if err == nil || !strings.Contains(err.Error(), "invalid bgrect command format") {
-			t.Errorf("Очікувалася помилка invalid bgrect command format, отримано %v", err)
+			t.Errorf("Expected invalid bgrect command format error, got %v", err)
 		}
 	})
 
 	t.Run("invalid bgrect values", func(t *testing.T) {
-		_, err := parser.Parse(strings.NewReader("bgrect a b c d"))
+		_, err := parser.Parse(strings.NewReader("bgrect 2.1 b 1.9 4.3"))
 		if err == nil || !strings.Contains(err.Error(), "invalid") {
-			t.Errorf("Очікувалася помилка invalid X1 value, отримано %v", err)
+			t.Errorf("Expected invalid Y1 value error, got %v", err)
 		}
 	})
 }
