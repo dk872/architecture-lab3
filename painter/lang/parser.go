@@ -19,7 +19,7 @@ type Parser struct {
 	moveOperations   []painter.Operation        // Операції руху
 }
 
-// clearOperations очищає всі зібрані операції
+// clearOperations очищає операції оновлення та руху
 func (p *Parser) clearOperations() {
 	p.updateOperation = nil
 	p.moveOperations = nil
